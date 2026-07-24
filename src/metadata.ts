@@ -93,6 +93,24 @@ async function fetchHtml(url: string, proxyUrl: string): Promise<string> {
   return response.text;
 }
 
+async function canLoadIcon(url: string, proxyUrl: string): Promise<boolean> {
+  try {
+    if (proxyUrl.trim()) {
+      await fetchWithProxy(url, proxyUrl.trim());
+      return true;
+    }
+    const response = await requestUrl({
+      url,
+      method: "GET",
+      headers: { "User-Agent": USER_AGENT, Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8" },
+      throw: false
+    });
+    return response.status >= 200 && response.status < 400;
+  } catch {
+    return false;
+  }
+}
+
 export async function fetchLinkMetadata(url: string, proxyUrl: string): Promise<LinkMetadata> {
   const pageUrl = new URL(url);
   const html = await fetchHtml(pageUrl.href, proxyUrl);
@@ -103,11 +121,12 @@ export async function fetchLinkMetadata(url: string, proxyUrl: string): Promise<
   const description = attribute(html, "property", "og:description")
     ?? attribute(html, "name", "description")
     ?? "";
-  const icon = resolveUrl(
+  const iconCandidate = resolveUrl(
     html.match(/<link\s+[^>]*rel\s*=\s*["'][^"']*icon[^"']*["'][^>]*href\s*=\s*["']([^"']+)["']/i)?.[1]
       ?? html.match(/<link\s+[^>]*href\s*=\s*["']([^"']+)["'][^>]*rel\s*=\s*["'][^"']*icon[^"']*["']/i)?.[1],
     pageUrl
   ) ?? new URL("/favicon.ico", pageUrl).href;
+  const icon = await canLoadIcon(iconCandidate, proxyUrl) ? iconCandidate : undefined;
 
   return { title, description, hostname: pageUrl.hostname, icon, url: pageUrl.href };
 }

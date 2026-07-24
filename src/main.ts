@@ -2,7 +2,7 @@ import { Editor, MarkdownView, Notice, Plugin } from "obsidian";
 import { fetchLinkMetadata } from "./metadata";
 import { LinkTitlePlusSettingTab } from "./settings";
 import { renderTemplate } from "./template";
-import { DEFAULT_SETTINGS, type LinkTitlePlusSettings } from "./types";
+import { DEFAULT_SETTINGS, LEGACY_DEFAULT_TEMPLATE, type LinkTitlePlusSettings } from "./types";
 
 const URL_PATTERN = /^https?:\/\/[^\s<>]+$/i;
 const PLACEHOLDER_PREFIX = "LinkTitlePlus-";
@@ -19,7 +19,12 @@ export default class LinkTitlePlusPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    this.settings = { ...DEFAULT_SETTINGS, ...(await this.loadData()) };
+    const storedSettings = await this.loadData() as Partial<LinkTitlePlusSettings> | null;
+    this.settings = { ...DEFAULT_SETTINGS, ...storedSettings };
+    if (this.settings.displayTemplate === LEGACY_DEFAULT_TEMPLATE) {
+      this.settings.displayTemplate = DEFAULT_SETTINGS.displayTemplate;
+      await this.saveSettings();
+    }
   }
 
   async saveSettings(): Promise<void> {

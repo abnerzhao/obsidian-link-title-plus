@@ -13,7 +13,7 @@
 默认输出：
 
 ```md
-[![example.com 图标|16](https://example.com/favicon.ico) Example Domain](https://example.com/)
+[![图标|16](https://example.com/favicon.ico) Example Domain](https://example.com/)
 ```
 
 在阅读视图或 Live Preview 中，它会显示为包含网站图标和标题的链接。
@@ -35,6 +35,7 @@
 | `{{hostname}}` | 域名 |
 | `{{icon}}` | favicon URL |
 | `{{description}}` | 网页描述 |
+| `{{site}}` | 成功获取图标时显示 16px 图标；否则显示域名 |
 
 例如，只保留标题：
 
