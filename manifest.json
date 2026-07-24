@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-link-title-plus",
+  "name": "obsidian-link-title-plus",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "将粘贴的 URL 转换为带标题和图标的链接。",
+  "author": "Abner Zhao",
+  "authorUrl": "https://github.com/abnerzhao",
+  "isDesktopOnly": true
+}
