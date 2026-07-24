@@ -5,7 +5,13 @@ import * as http from "node:http";
 import * as https from "node:https";
 import type { LinkMetadata } from "./types";
 
-const USER_AGENT = "Mozilla/5.0 (compatible; LinkTitlePlus/0.1)";
+const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+const SITE_NAMES: Record<string, string> = {
+  "douban.com": "豆瓣",
+  "youtube.com": "YouTube",
+  "youtu.be": "YouTube",
+  "github.com": "GitHub"
+};
 
 function decodeHtml(value: string): string {
   return value
@@ -40,6 +46,16 @@ function resolveUrl(value: string | undefined, baseUrl: URL): string | undefined
   } catch {
     return undefined;
   }
+}
+
+function getSiteName(hostname: string, title = ""): string {
+  const normalizedHostname = hostname.toLowerCase().replace(/^www\./, "");
+  for (const [domain, siteName] of Object.entries(SITE_NAMES)) {
+    if (normalizedHostname === domain || normalizedHostname.endsWith(`.${domain}`)) return siteName;
+  }
+  const titleSuffix = title.match(/\(([^()]+)\)\s*$/)?.[1]?.trim();
+  if (titleSuffix) return titleSuffix;
+  return normalizedHostname.split(".")[0];
 }
 
 async function fetchWithProxy(url: string, proxyUrl: string, redirects = 0): Promise<string> {
@@ -113,7 +129,13 @@ async function canLoadIcon(url: string, proxyUrl: string): Promise<boolean> {
 
 export async function fetchLinkMetadata(url: string, proxyUrl: string): Promise<LinkMetadata> {
   const pageUrl = new URL(url);
-  const html = await fetchHtml(pageUrl.href, proxyUrl);
+  let html: string;
+  try {
+    html = await fetchHtml(pageUrl.href, proxyUrl);
+  } catch {
+    const siteName = getSiteName(pageUrl.hostname);
+    return { title: siteName, description: "", hostname: pageUrl.hostname, siteName, url: pageUrl.href };
+  }
   const title = attribute(html, "property", "og:title")
     ?? attribute(html, "name", "twitter:title")
     ?? textFromHtml(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1])
@@ -121,6 +143,9 @@ export async function fetchLinkMetadata(url: string, proxyUrl: string): Promise<
   const description = attribute(html, "property", "og:description")
     ?? attribute(html, "name", "description")
     ?? "";
+  const siteName = attribute(html, "property", "og:site_name")
+    ?? attribute(html, "name", "application-name")
+    ?? getSiteName(pageUrl.hostname, title);
   const iconCandidate = resolveUrl(
     html.match(/<link\s+[^>]*rel\s*=\s*["'][^"']*icon[^"']*["'][^>]*href\s*=\s*["']([^"']+)["']/i)?.[1]
       ?? html.match(/<link\s+[^>]*href\s*=\s*["']([^"']+)["'][^>]*rel\s*=\s*["'][^"']*icon[^"']*["']/i)?.[1],
@@ -128,5 +153,5 @@ export async function fetchLinkMetadata(url: string, proxyUrl: string): Promise<
   ) ?? new URL("/favicon.ico", pageUrl).href;
   const icon = await canLoadIcon(iconCandidate, proxyUrl) ? iconCandidate : undefined;
 
-  return { title, description, hostname: pageUrl.hostname, icon, url: pageUrl.href };
+  return { title, description, hostname: pageUrl.hostname, siteName, icon, url: pageUrl.href };
 }

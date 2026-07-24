@@ -22,7 +22,7 @@ export class LinkTitlePlusSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("链接展示模板")
-      .setDesc("可用：{{site}}、{{title}}、{{url}}、{{hostname}}、{{icon}}、{{description}}。{{site}} 会优先显示图标，失败时显示域名。")
+      .setDesc("可用：{{display}}、{{site}}、{{siteName}}、{{title}}、{{url}}、{{hostname}}、{{icon}}、{{description}}。默认的 {{display}} 会优先显示图标，失败时显示网站名称。")
       .addTextArea((text) => text
         .setPlaceholder("[{{title}}]({{url}})")
         .setValue(this.plugin.settings.displayTemplate)

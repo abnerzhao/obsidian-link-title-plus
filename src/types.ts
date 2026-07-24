@@ -2,6 +2,7 @@ export interface LinkMetadata {
   title: string;
   description: string;
   hostname: string;
+  siteName: string;
   icon?: string;
   url: string;
 }
@@ -14,8 +15,9 @@ export interface LinkTitlePlusSettings {
 
 export const DEFAULT_SETTINGS: LinkTitlePlusSettings = {
   enabled: true,
-  displayTemplate: "[{{site}} {{title}}]({{url}})",
+  displayTemplate: "[{{display}}]({{url}})",
   proxyUrl: ""
 };
 
 export const LEGACY_DEFAULT_TEMPLATE = "[![{{hostname}} 图标|16]({{icon}}) {{title}}]({{url}})";
+export const PREVIOUS_DEFAULT_TEMPLATE = "[{{site}} {{title}}]({{url}})";
