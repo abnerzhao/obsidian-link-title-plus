@@ -84,7 +84,7 @@ npm run dev
 开发时将 `main.js`、`manifest.json` 和 `styles.css` 链接或复制到测试 Vault：
 
 ```text
-<Vault>/.obsidian/plugins/obsidian-link-title-plus/
+<Vault>/.obsidian/plugins/link-title-plus/
 ```
 
 生产构建：
@@ -92,6 +92,10 @@ npm run dev
 ```bash
 npm run build
 ```
+
+## 发布说明
+
+发布记录见 [CHANGELOG.md](CHANGELOG.md)。首个社区版本为 `0.1.0`；创建 GitHub Release 时请使用相同的 Tag，并上传 `main.js`、`manifest.json` 和 `styles.css`。
 
 ## 当前范围
 
