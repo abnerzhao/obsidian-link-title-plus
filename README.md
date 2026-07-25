@@ -6,7 +6,8 @@
 
 - 粘贴单个 HTTP(S) URL 时自动转换。
 - 优先读取 Open Graph / Twitter 标题，回退到页面 `<title>`。
-- 读取网页 favicon；未声明时回退为站点 `/favicon.ico`。
+- 读取网页 favicon；图标以内联数据写入链接，避免网站 CDN 防盗链导致阅读时显示失败。
+- YouTube 使用 oEmbed 获取标题，不请求或加载视频页面。
 - 使用模板决定链接中显示哪些信息。
 - 支持 HTTP、HTTPS 和 SOCKS5 代理抓取网页元数据。
 

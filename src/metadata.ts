@@ -1,4 +1,4 @@
-import { requestUrl } from "obsidian";
+import { arrayBufferToBase64, requestUrl } from "obsidian";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import * as http from "node:http";
@@ -12,6 +12,12 @@ const SITE_NAMES: Record<string, string> = {
   "youtu.be": "YouTube",
   "github.com": "GitHub"
 };
+const MAX_ICON_SIZE = 32 * 1024;
+
+interface ProxyResponse {
+  body: Buffer;
+  contentType?: string;
+}
 
 function decodeHtml(value: string): string {
   return value
@@ -58,7 +64,12 @@ function getSiteName(hostname: string, title = ""): string {
   return normalizedHostname.split(".")[0];
 }
 
-async function fetchWithProxy(url: string, proxyUrl: string, redirects = 0): Promise<string> {
+async function fetchWithProxy(
+  url: string,
+  proxyUrl: string,
+  redirects = 0,
+  extraHeaders: Record<string, string> = {}
+): Promise<ProxyResponse> {
   const proxy = new URL(proxyUrl);
   if (!/^(https?|socks4a?|socks5h?):$/.test(proxy.protocol)) {
     throw new Error("代理地址必须使用 HTTP、HTTPS 或 SOCKS 协议");
@@ -74,12 +85,12 @@ async function fetchWithProxy(url: string, proxyUrl: string, redirects = 0): Pro
       : new HttpsProxyAgent(proxy);
     const request = transport.get(url, {
       agent,
-      headers: { "User-Agent": USER_AGENT, Accept: "text/html,application/xhtml+xml" },
+      headers: { "User-Agent": USER_AGENT, ...extraHeaders },
       timeout: 12_000
     }, (response) => {
       if (response.statusCode && response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
         response.resume();
-        void fetchWithProxy(new URL(response.headers.location, url).href, proxyUrl, redirects + 1).then(resolve, reject);
+        void fetchWithProxy(new URL(response.headers.location, url).href, proxyUrl, redirects + 1, extraHeaders).then(resolve, reject);
         return;
       }
       if (response.statusCode && response.statusCode >= 400) {
@@ -87,10 +98,14 @@ async function fetchWithProxy(url: string, proxyUrl: string, redirects = 0): Pro
         reject(new Error(`请求失败 (${response.statusCode})`));
         return;
       }
-      let body = "";
-      response.setEncoding("utf8");
-      response.on("data", (chunk: string) => { body += chunk; });
-      response.on("end", () => resolve(body));
+      const chunks: Buffer[] = [];
+      response.on("data", (chunk: Buffer) => { chunks.push(chunk); });
+      response.on("end", () => resolve({
+        body: Buffer.concat(chunks),
+        contentType: Array.isArray(response.headers["content-type"])
+          ? response.headers["content-type"][0]
+          : response.headers["content-type"]
+      }));
     });
     request.on("timeout", () => request.destroy(new Error("请求超时")));
     request.on("error", reject);
@@ -98,7 +113,10 @@ async function fetchWithProxy(url: string, proxyUrl: string, redirects = 0): Pro
 }
 
 async function fetchHtml(url: string, proxyUrl: string): Promise<string> {
-  if (proxyUrl.trim()) return fetchWithProxy(url, proxyUrl.trim());
+  if (proxyUrl.trim()) {
+    const response = await fetchWithProxy(url, proxyUrl.trim(), 0, { Accept: "text/html,application/xhtml+xml" });
+    return response.body.toString("utf8");
+  }
   const response = await requestUrl({
     url,
     method: "GET",
@@ -109,32 +127,66 @@ async function fetchHtml(url: string, proxyUrl: string): Promise<string> {
   return response.text;
 }
 
-async function canLoadIcon(url: string, proxyUrl: string): Promise<boolean> {
+async function fetchIconDataUrl(url: string, referer: string, proxyUrl: string): Promise<string | undefined> {
   try {
     if (proxyUrl.trim()) {
-      await fetchWithProxy(url, proxyUrl.trim());
-      return true;
+      const response = await fetchWithProxy(url, proxyUrl.trim(), 0, {
+        Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        Referer: referer
+      });
+      if (!response.contentType?.startsWith("image/") || response.body.length > MAX_ICON_SIZE) return undefined;
+      return `data:${response.contentType.split(";", 1)[0]};base64,${response.body.toString("base64")}`;
     }
     const response = await requestUrl({
       url,
       method: "GET",
-      headers: { "User-Agent": USER_AGENT, Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8" },
+      headers: {
+        "User-Agent": USER_AGENT,
+        Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        Referer: referer
+      },
       throw: false
     });
-    return response.status >= 200 && response.status < 400;
+    const contentType = response.headers["content-type"]?.split(";", 1)[0];
+    if (response.status < 200 || response.status >= 400 || !contentType?.startsWith("image/") || response.arrayBuffer.byteLength > MAX_ICON_SIZE) {
+      return undefined;
+    }
+    return `data:${contentType};base64,${arrayBufferToBase64(response.arrayBuffer)}`;
   } catch {
-    return false;
+    return undefined;
+  }
+}
+
+function fallbackMetadata(pageUrl: URL): LinkMetadata {
+  const siteName = getSiteName(pageUrl.hostname);
+  return { title: siteName, description: "", hostname: pageUrl.hostname, siteName, url: pageUrl.href };
+}
+
+function isYoutubeUrl(pageUrl: URL): boolean {
+  const hostname = pageUrl.hostname.toLowerCase().replace(/^www\./, "");
+  return hostname === "youtube.com" || hostname.endsWith(".youtube.com") || hostname === "youtu.be";
+}
+
+async function fetchYoutubeMetadata(pageUrl: URL, proxyUrl: string): Promise<LinkMetadata> {
+  try {
+    const endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(pageUrl.href)}&format=json`;
+    const data = JSON.parse(await fetchHtml(endpoint, proxyUrl)) as { title?: string };
+    const title = typeof data.title === "string" && data.title.trim() ? data.title.trim() : "YouTube";
+    const icon = await fetchIconDataUrl("https://www.youtube.com/favicon.ico", pageUrl.href, proxyUrl);
+    return { title, description: "", hostname: pageUrl.hostname, siteName: "YouTube", icon, url: pageUrl.href };
+  } catch {
+    return fallbackMetadata(pageUrl);
   }
 }
 
 export async function fetchLinkMetadata(url: string, proxyUrl: string): Promise<LinkMetadata> {
   const pageUrl = new URL(url);
+  if (isYoutubeUrl(pageUrl)) return fetchYoutubeMetadata(pageUrl, proxyUrl);
   let html: string;
   try {
     html = await fetchHtml(pageUrl.href, proxyUrl);
   } catch {
-    const siteName = getSiteName(pageUrl.hostname);
-    return { title: siteName, description: "", hostname: pageUrl.hostname, siteName, url: pageUrl.href };
+    return fallbackMetadata(pageUrl);
   }
   const title = attribute(html, "property", "og:title")
     ?? attribute(html, "name", "twitter:title")
@@ -151,7 +203,7 @@ export async function fetchLinkMetadata(url: string, proxyUrl: string): Promise<
       ?? html.match(/<link\s+[^>]*href\s*=\s*["']([^"']+)["'][^>]*rel\s*=\s*["'][^"']*icon[^"']*["']/i)?.[1],
     pageUrl
   ) ?? new URL("/favicon.ico", pageUrl).href;
-  const icon = await canLoadIcon(iconCandidate, proxyUrl) ? iconCandidate : undefined;
+  const icon = await fetchIconDataUrl(iconCandidate, pageUrl.href, proxyUrl);
 
   return { title, description, hostname: pageUrl.hostname, siteName, icon, url: pageUrl.href };
 }
