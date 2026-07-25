@@ -20,16 +20,23 @@ export class LinkTitlePlusSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings();
         }));
 
-    new Setting(containerEl)
+    const templateSetting = new Setting(containerEl)
       .setName("链接展示模板")
-      .setDesc("可用：{{display}}、{{site}}、{{siteName}}、{{title}}、{{url}}、{{hostname}}、{{icon}}、{{description}}。默认的 {{display}} 会优先显示图标，失败时显示网站名称。")
+      .setDesc("默认模板会自动处理图标和网站名称；通常只需保留默认值。")
       .addTextArea((text) => text
-        .setPlaceholder("[{{title}}]({{url}})")
+        .setPlaceholder("[{{display}}]({{url}})")
         .setValue(this.plugin.settings.displayTemplate)
         .onChange(async (value) => {
           this.plugin.settings.displayTemplate = value.trim() || "[{{title}}]({{url}})";
           await this.plugin.saveSettings();
         }));
+
+    templateSetting.descEl.createEl("div", { text: "默认：[{{display}}]({{url}})" });
+    templateSetting.descEl.createEl("div", { text: "仅标题：[{{title}}]({{url}})" });
+    templateSetting.descEl.createEl("div", { text: "网站名 + 标题：[{{siteName}} · {{title}}]({{url}})" });
+    templateSetting.descEl.createEl("small", {
+      text: "高级占位符：{{site}}、{{hostname}}、{{icon}}、{{description}}。{{display}} = 图标或网站名称 + 标题。"
+    });
 
     new Setting(containerEl)
       .setName("代理地址")

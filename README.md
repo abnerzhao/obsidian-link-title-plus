@@ -14,10 +14,17 @@
 默认输出：
 
 ```md
-[![图标|16](https://example.com/favicon.ico) Example Domain](https://example.com/)
+[{{display}}]({{url}})
 ```
 
-在阅读视图或 Live Preview 中，它会显示为包含网站图标和标题的链接。
+`{{display}}` 是默认展示组合：有图标时为“图标 + 标题”，无法获取图标时为“网站名称 + 标题”。
+
+例如：
+
+```md
+[![图标|16](data:image/x-icon;base64,...) Example Domain](https://example.com/)
+[豆瓣 Python Cookbook（第3版）中文版](https://book.douban.com/subject/26381341/)
+```
 
 ## 设置
 
@@ -35,10 +42,16 @@
 | `{{url}}` | 原始 URL |
 | `{{hostname}}` | 域名 |
 | `{{siteName}}` | 网站名称 |
-| `{{icon}}` | favicon URL |
+| `{{icon}}` | 内联的 favicon 数据 URL |
 | `{{description}}` | 网页描述 |
 | `{{site}}` | 成功获取图标时显示 16px 图标；否则显示网站名称 |
 | `{{display}}` | 默认展示：图标或网站名称，加网页标题 |
+
+一般只需使用默认模板：
+
+```md
+[{{display}}]({{url}})
+```
 
 例如，只保留标题：
 
@@ -46,10 +59,10 @@
 [{{title}}]({{url}})
 ```
 
-例如，展示域名和标题：
+例如，始终展示网站名称和标题：
 
 ```md
-[{{hostname}}: {{title}}]({{url}})
+[{{siteName}} · {{title}}]({{url}})
 ```
 
 代理示例：
@@ -59,7 +72,7 @@ http://127.0.0.1:7890
 socks5://127.0.0.1:1080
 ```
 
-> favicon 会由 Obsidian 在渲染 Markdown 时单独加载，不经过此处的元数据抓取代理。
+> favicon 在生成链接时由插件获取并转为内联数据，避免远程图片防盗链导致图标显示失败。
 
 ## 本地开发
 
