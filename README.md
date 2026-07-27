@@ -4,6 +4,22 @@
 
 粘贴 URL 时，自动抓取网页标题和站点图标，生成可配置的 Markdown 链接。
 
+## 安装
+
+社区插件审核通过后，在 Obsidian 的“设置 -> 第三方插件 -> 社区插件”中搜索 `Link Title Plus` 并启用。
+
+手动安装时，将 `main.js`、`manifest.json` 和 `styles.css` 放入：
+
+```text
+<Vault>/.obsidian/plugins/link-title-plus/
+```
+
+然后在 Obsidian 的第三方插件列表中启用插件。
+
+## 使用
+
+在 Markdown 编辑器中直接粘贴单个 HTTP(S) URL。插件会替换为带网页标题的 Markdown 链接；成功获取 favicon 时显示图标，否则显示网站名称。可在插件设置中修改展示模板或填写代理地址。
+
 ## 功能
 
 - 粘贴单个 HTTP(S) URL 时自动转换。
@@ -75,3 +91,12 @@ socks5://127.0.0.1:1080
 ```
 
 > favicon 在生成链接时由插件获取并转为内联数据，避免远程图片防盗链导致图标显示失败。
+
+<details>
+<summary>English</summary>
+
+Link Title Plus converts a pasted HTTP(S) URL into a Markdown link with its page title and favicon. Install it from Obsidian Community Plugins after approval, or manually copy `main.js`, `manifest.json`, and `styles.css` into `<Vault>/.obsidian/plugins/link-title-plus/`, then enable the plugin.
+
+To use it, paste a single URL into a Markdown editor. Configure the display template and optional HTTP, HTTPS, or SOCKS5 proxy in the plugin settings.
+
+</details>
