@@ -1,6 +1,6 @@
 {
   "name": "obsidian-link-title-plus",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fetch titles and favicons for pasted URLs in Obsidian.",
   "main": "main.js",
   "scripts": {

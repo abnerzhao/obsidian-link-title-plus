@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.1 - 2026-07-27
+
+- Respect already handled paste events and prevent the default paste after handling a URL.
+- Add declarative setting definitions for Obsidian settings search.
+- Improve metadata-fetching type safety.
+- Make the Chinese README the default documentation and add a separate English README.
+
 ## 0.1.0 - 2026-07-25
 
 Initial community release.
