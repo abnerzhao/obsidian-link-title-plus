@@ -19,6 +19,10 @@ interface ProxyResponse {
   contentType?: string;
 }
 
+function getContentType(value: string | string[] | undefined): string | undefined {
+  return typeof value === "string" ? value : value?.[0];
+}
+
 function decodeHtml(value: string): string {
   return value
     .replace(/&amp;/gi, "&")
@@ -26,9 +30,10 @@ function decodeHtml(value: string): string {
     .replace(/&#39;|&apos;/gi, "'")
     .replace(/&lt;/gi, "<")
     .replace(/&gt;/gi, ">")
-    .replace(/&#(?:x([0-9a-f]+)|([0-9]+));/gi, (_, hex, decimal) =>
-      String.fromCodePoint(parseInt(hex || decimal, hex ? 16 : 10))
-    );
+    .replace(/&#(?:x([0-9a-f]+)|([0-9]+));/gi, (match: string, hex?: string, decimal?: string) => {
+      const codePoint = Number.parseInt(hex ?? decimal ?? "", hex ? 16 : 10);
+      return Number.isNaN(codePoint) ? match : String.fromCodePoint(codePoint);
+    });
 }
 
 function textFromHtml(value: string | undefined): string {
@@ -102,9 +107,7 @@ async function fetchWithProxy(
       response.on("data", (chunk: Buffer) => { chunks.push(chunk); });
       response.on("end", () => resolve({
         body: Buffer.concat(chunks),
-        contentType: Array.isArray(response.headers["content-type"])
-          ? response.headers["content-type"][0]
-          : response.headers["content-type"]
+        contentType: getContentType(response.headers["content-type"])
       }));
     });
     request.on("timeout", () => request.destroy(new Error("请求超时")));

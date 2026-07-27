@@ -14,7 +14,12 @@ export default class LinkTitlePlusPlugin extends Plugin {
     await this.loadSettings();
     this.addSettingTab(new LinkTitlePlusSettingTab(this.app, this));
     this.registerEvent(this.app.workspace.on("editor-paste", (event: ClipboardEvent, editor: Editor) => {
-      void this.handlePaste(event, editor);
+      if (event.defaultPrevented) return;
+      const text = event.clipboardData?.getData("text/plain")?.trim();
+      if (!this.shouldEnhancePaste(text)) return;
+      event.stopPropagation();
+      event.preventDefault();
+      void this.handlePaste(editor, text);
     }));
   }
 
@@ -31,13 +36,16 @@ export default class LinkTitlePlusPlugin extends Plugin {
     await this.saveData(this.settings);
   }
 
-  private async handlePaste(event: ClipboardEvent, editor: Editor): Promise<void> {
-    if (!this.settings.enabled || !(this.app.workspace.getActiveViewOfType(MarkdownView))) return;
-    const text = event.clipboardData?.getData("text/plain")?.trim();
-    if (!text || !URL_PATTERN.test(text)) return;
+  private shouldEnhancePaste(text: string | undefined): text is string {
+    return Boolean(
+      this.settings.enabled
+      && this.app.workspace.getActiveViewOfType(MarkdownView)
+      && text
+      && URL_PATTERN.test(text)
+    );
+  }
 
-    event.stopPropagation();
-    event.preventDefault();
+  private async handlePaste(editor: Editor, text: string): Promise<void> {
     const marker = `${PLACEHOLDER_PREFIX}${crypto.randomUUID()}`;
     editor.replaceSelection(marker);
 
