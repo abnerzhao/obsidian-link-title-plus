@@ -3,7 +3,7 @@
   "name": "Link Title Plus",
   "version": "0.1.0",
   "minAppVersion": "1.5.0",
-  "description": "将粘贴的 URL 转换为带标题和图标的链接。",
+  "description": "Convert pasted URLs into Markdown links with titles and favicons.",
   "author": "Abner Zhao",
   "authorUrl": "https://github.com/abnerzhao",
   "isDesktopOnly": true
