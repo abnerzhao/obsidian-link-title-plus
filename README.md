@@ -105,30 +105,3 @@ socks5://127.0.0.1:1080
 ```
 
 > favicon 在生成链接时由插件获取并转为内联数据，避免远程图片防盗链导致图标显示失败。
-
-## 本地开发
-
-```bash
-npm install
-npm run dev
-```
-
-开发时将 `main.js`、`manifest.json` 和 `styles.css` 链接或复制到测试 Vault：
-
-```text
-<Vault>/.obsidian/plugins/link-title-plus/
-```
-
-生产构建：
-
-```bash
-npm run build
-```
-
-## 发布说明
-
-发布记录见 [CHANGELOG.md](CHANGELOG.md)。首个社区版本为 `0.1.0`；创建 GitHub Release 时请使用相同的 Tag，并上传 `main.js`、`manifest.json` 和 `styles.css`。
-
-## 当前范围
-
-这是第一版 MVP，仅处理编辑器中粘贴的单个 URL。暂不包含批量补全、拖拽处理、缓存和移动端支持。
