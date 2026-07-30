@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.3 - 2026-07-30
+
+- Update the README with English installation and usage instructions.
+- Move the Chinese documentation to a dedicated README.zh-CN.md file.
+
 ## 0.1.1 - 2026-07-27
 
 - Respect already handled paste events and prevent the default paste after handling a URL.
