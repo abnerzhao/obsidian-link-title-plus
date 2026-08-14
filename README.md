@@ -38,7 +38,7 @@ The default template is:
 [{{display}}]({{url}})
 ```
 
-`{{display}}` renders a 16px icon and title when a favicon is available, or a website name and title when it is not. When **Show website icons automatically** is disabled, it renders the page title followed by the website name.
+`{{display}}` renders a 16px icon and title when a favicon is available, or a website name and title when it is not. When **Show website icons automatically** is disabled, it renders the page title followed by the website name. It does not repeat the website name when it is already part of the title.
 
 Available placeholders:
 
