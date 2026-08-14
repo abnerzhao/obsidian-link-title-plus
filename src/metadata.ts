@@ -12,6 +12,9 @@ const SITE_NAMES: Record<string, string> = {
   "youtu.be": "YouTube",
   "github.com": "GitHub"
 };
+const SITE_ICON_URLS: Record<string, string> = {
+  "github.com": "https://github.com/favicon.ico"
+};
 const MAX_ICON_SIZE = 32 * 1024;
 
 interface ProxyResponse {
@@ -67,6 +70,14 @@ function getSiteName(hostname: string, title = ""): string {
   const titleSuffix = title.match(/\(([^()]+)\)\s*$/)?.[1]?.trim();
   if (titleSuffix) return titleSuffix;
   return normalizedHostname.split(".")[0];
+}
+
+function getSiteIconUrl(hostname: string): string | undefined {
+  const normalizedHostname = hostname.toLowerCase().replace(/^www\./, "");
+  for (const [domain, iconUrl] of Object.entries(SITE_ICON_URLS)) {
+    if (normalizedHostname === domain || normalizedHostname.endsWith(`.${domain}`)) return iconUrl;
+  }
+  return undefined;
 }
 
 async function fetchWithProxy(
@@ -160,9 +171,11 @@ async function fetchIconDataUrl(url: string, referer: string, proxyUrl: string):
   }
 }
 
-function fallbackMetadata(pageUrl: URL): LinkMetadata {
+async function fallbackMetadata(pageUrl: URL, proxyUrl: string): Promise<LinkMetadata> {
   const siteName = getSiteName(pageUrl.hostname);
-  return { title: siteName, description: "", hostname: pageUrl.hostname, siteName, url: pageUrl.href };
+  const iconUrl = getSiteIconUrl(pageUrl.hostname);
+  const icon = iconUrl ? await fetchIconDataUrl(iconUrl, pageUrl.href, proxyUrl) : undefined;
+  return { title: siteName, description: "", hostname: pageUrl.hostname, siteName, icon, url: pageUrl.href };
 }
 
 function isYoutubeUrl(pageUrl: URL): boolean {
@@ -178,7 +191,7 @@ async function fetchYoutubeMetadata(pageUrl: URL, proxyUrl: string): Promise<Lin
     const icon = await fetchIconDataUrl("https://www.youtube.com/favicon.ico", pageUrl.href, proxyUrl);
     return { title, description: "", hostname: pageUrl.hostname, siteName: "YouTube", icon, url: pageUrl.href };
   } catch {
-    return fallbackMetadata(pageUrl);
+    return fallbackMetadata(pageUrl, proxyUrl);
   }
 }
 
@@ -189,7 +202,7 @@ export async function fetchLinkMetadata(url: string, proxyUrl: string): Promise<
   try {
     html = await fetchHtml(pageUrl.href, proxyUrl);
   } catch {
-    return fallbackMetadata(pageUrl);
+    return fallbackMetadata(pageUrl, proxyUrl);
   }
   const title = attribute(html, "property", "og:title")
     ?? attribute(html, "name", "twitter:title")
@@ -201,7 +214,7 @@ export async function fetchLinkMetadata(url: string, proxyUrl: string): Promise<
   const siteName = attribute(html, "property", "og:site_name")
     ?? attribute(html, "name", "application-name")
     ?? getSiteName(pageUrl.hostname, title);
-  const iconCandidate = resolveUrl(
+  const iconCandidate = getSiteIconUrl(pageUrl.hostname) ?? resolveUrl(
     html.match(/<link\s+[^>]*rel\s*=\s*["'][^"']*icon[^"']*["'][^>]*href\s*=\s*["']([^"']+)["']/i)?.[1]
       ?? html.match(/<link\s+[^>]*href\s*=\s*["']([^"']+)["'][^>]*rel\s*=\s*["'][^"']*icon[^"']*["']/i)?.[1],
     pageUrl

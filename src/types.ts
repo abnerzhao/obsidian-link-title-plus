@@ -9,12 +9,14 @@ export interface LinkMetadata {
 
 export interface LinkTitlePlusSettings {
   enabled: boolean;
+  showIcon: boolean;
   displayTemplate: string;
   proxyUrl: string;
 }
 
 export const DEFAULT_SETTINGS: LinkTitlePlusSettings = {
   enabled: true,
+  showIcon: false,
   displayTemplate: "[{{display}}]({{url}})",
   proxyUrl: ""
 };

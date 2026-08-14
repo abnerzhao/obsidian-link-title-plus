@@ -51,7 +51,7 @@ export default class LinkTitlePlusPlugin extends Plugin {
 
     try {
       const metadata = await fetchLinkMetadata(text, this.settings.proxyUrl);
-      const output = renderTemplate(this.settings.displayTemplate, metadata);
+      const output = renderTemplate(this.settings.displayTemplate, metadata, this.settings.showIcon);
       this.replaceMarker(editor, marker, output);
     } catch (error) {
       this.replaceMarker(editor, marker, text);

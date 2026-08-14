@@ -6,10 +6,12 @@ function escapeMarkdownText(value: string): string {
   return value.replace(/[\\[\]]/g, "\\$&").replace(/\r?\n/g, " ").trim();
 }
 
-export function renderTemplate(template: string, metadata: LinkMetadata): string {
-  const site = metadata.icon
-    ? `![图标|16](${metadata.icon})`
-    : escapeMarkdownText(metadata.siteName);
+export function renderTemplate(template: string, metadata: LinkMetadata, showIcon: boolean): string {
+  const site = showIcon
+    ? metadata.icon
+      ? `<img class="link-title-plus-icon" src="${metadata.icon}" alt="" width="16" height="16">`
+      : escapeMarkdownText(metadata.siteName)
+    : "";
   const title = escapeMarkdownText(metadata.title);
   const values: Record<string, string> = {
     title,
@@ -19,7 +21,7 @@ export function renderTemplate(template: string, metadata: LinkMetadata): string
     icon: metadata.icon ?? "",
     description: escapeMarkdownText(metadata.description),
     site,
-    display: title === metadata.siteName ? site : `${site} ${title}`
+    display: site ? (title === metadata.siteName ? site : `${site} ${title}`) : title
   };
 
   return template.replace(PLACEHOLDER, (_, key: string) => values[key]);

@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting, type SettingDefinitionItem } from "obsi
 import type LinkTitlePlusPlugin from "./main";
 import { DEFAULT_SETTINGS, type LinkTitlePlusSettings } from "./types";
 
-const TEMPLATE_DESCRIPTION = "默认模板会自动处理图标和网站名称；通常只需保留默认值。\n默认：[{{display}}]({{url}})\n仅标题：[{{title}}]({{url}})\n网站名 + 标题：[{{siteName}} · {{title}}]({{url}})\n高级占位符：{{site}}、{{hostname}}、{{icon}}、{{description}}。{{display}} = 图标或网站名称 + 标题。";
+const TEMPLATE_DESCRIPTION = "默认模板通常只需保留即可。\n默认：[{{display}}]({{url}})\n仅标题：[{{title}}]({{url}})\n网站名 + 标题：[{{siteName}} · {{title}}]({{url}})\n高级占位符：{{site}}、{{hostname}}、{{icon}}、{{description}}。{{display}} = 标题；开启图标后，为图标或网站名称 + 标题。";
 
 export class LinkTitlePlusSettingTab extends PluginSettingTab {
   constructor(app: App, private plugin: LinkTitlePlusPlugin) {
@@ -15,6 +15,11 @@ export class LinkTitlePlusSettingTab extends PluginSettingTab {
         name: "自动补全链接标题",
         desc: "粘贴单个 HTTP(S) URL 时，自动抓取网页信息并生成链接。",
         control: { type: "toggle", key: "enabled", defaultValue: DEFAULT_SETTINGS.enabled }
+      },
+      {
+        name: "自动展示网站图标",
+        desc: "关闭时默认只显示网页标题；开启后优先显示 16px 网站图标，获取失败时显示网站名称。",
+        control: { type: "toggle", key: "showIcon", defaultValue: DEFAULT_SETTINGS.showIcon }
       },
       {
         name: "链接展示模板",
@@ -36,6 +41,8 @@ export class LinkTitlePlusSettingTab extends PluginSettingTab {
   async setControlValue(key: string, value: unknown): Promise<void> {
     if (key === "enabled" && typeof value === "boolean") {
       this.plugin.settings.enabled = value;
+    } else if (key === "showIcon" && typeof value === "boolean") {
+      this.plugin.settings.showIcon = value;
     } else if (key === "displayTemplate" && typeof value === "string") {
       this.plugin.settings.displayTemplate = value.trim() || DEFAULT_SETTINGS.displayTemplate;
     } else if (key === "proxyUrl" && typeof value === "string") {
@@ -58,6 +65,16 @@ export class LinkTitlePlusSettingTab extends PluginSettingTab {
         .setValue(this.plugin.settings.enabled)
         .onChange(async (value) => {
           this.plugin.settings.enabled = value;
+          await this.plugin.saveSettings();
+        }));
+
+    new Setting(containerEl)
+      .setName("自动展示网站图标")
+      .setDesc("关闭时默认只显示网页标题；开启后优先显示 16px 网站图标，获取失败时显示网站名称。")
+      .addToggle((toggle) => toggle
+        .setValue(this.plugin.settings.showIcon)
+        .onChange(async (value) => {
+          this.plugin.settings.showIcon = value;
           await this.plugin.saveSettings();
         }));
 

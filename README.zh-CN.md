@@ -18,7 +18,7 @@
 
 ## 使用
 
-在 Markdown 编辑器中直接粘贴单个 HTTP(S) URL。插件会替换为带网页标题的 Markdown 链接；成功获取 favicon 时显示图标，否则显示网站名称。可在插件设置中修改展示模板或填写代理地址。
+在 Markdown 编辑器中直接粘贴单个 HTTP(S) URL。插件会替换为带网页标题的 Markdown 链接；网站图标默认关闭，可在插件设置中开启。可在插件设置中修改展示模板或填写代理地址。
 
 ## 功能
 
@@ -35,13 +35,13 @@
 [{{display}}]({{url}})
 ```
 
-`{{display}}` 是默认展示组合：有图标时为“图标 + 标题”，无法获取图标时为“网站名称 + 标题”。
+`{{display}}` 默认只展示标题。开启“自动展示网站图标”后，有图标时为“16px 图标 + 标题”，无法获取图标时为“网站名称 + 标题”。
 
 例如：
 
 ```md
-[![图标|16](data:image/x-icon;base64,...) Example Domain](https://example.com/)
-[豆瓣 Python Cookbook（第3版）中文版](https://book.douban.com/subject/26381341/)
+[Example Domain](https://example.com/)
+[<img class="link-title-plus-icon" src="data:image/x-icon;base64,..." alt="" width="16" height="16"> Example Domain](https://example.com/)
 ```
 
 ## 设置
@@ -49,6 +49,7 @@
 | 设置项 | 说明 |
 | --- | --- |
 | 自动补全链接标题 | 关闭后保留 Obsidian 原生粘贴行为。 |
+| 自动展示网站图标 | 默认关闭；开启后优先展示 16px 图标，获取失败时展示网站名称。 |
 | 链接展示模板 | 定义生成的 Markdown 格式。 |
 | 代理地址 | 仅用于抓取网页元数据；留空时使用 Obsidian 默认网络。 |
 
@@ -62,8 +63,8 @@
 | `{{siteName}}` | 网站名称 |
 | `{{icon}}` | 内联的 favicon 数据 URL |
 | `{{description}}` | 网页描述 |
-| `{{site}}` | 成功获取图标时显示 16px 图标；否则显示网站名称 |
-| `{{display}}` | 默认展示：图标或网站名称，加网页标题 |
+| `{{site}}` | 默认为空；开启自动图标后，成功获取图标时显示 16px 图标，否则显示网站名称 |
+| `{{display}}` | 默认展示标题；开启自动图标后，展示图标或网站名称，加网页标题 |
 
 一般只需使用默认模板：
 

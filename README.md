@@ -18,7 +18,7 @@ Then enable the plugin from Obsidian's Community plugins settings.
 
 ## Usage
 
-Paste a single HTTP(S) URL in a Markdown editor. The plugin replaces it with a Markdown link containing the page title. When a favicon is available, it is displayed; otherwise the website name is used.
+Paste a single HTTP(S) URL in a Markdown editor. The plugin replaces it with a Markdown link containing the page title. Website icons are disabled by default and can be enabled in the plugin settings.
 
 Configure the display template and optional proxy in the plugin settings.
 
@@ -38,7 +38,7 @@ The default template is:
 [{{display}}]({{url}})
 ```
 
-`{{display}}` renders an icon and title when a favicon is available, or a website name and title when it is not.
+`{{display}}` renders the page title by default. When **Show website icons automatically** is enabled, it renders a 16px icon and title when a favicon is available, or a website name and title when it is not.
 
 Available placeholders:
 
@@ -50,8 +50,8 @@ Available placeholders:
 | `{{siteName}}` | Website name |
 | `{{icon}}` | Inlined favicon data URL |
 | `{{description}}` | Page description |
-| `{{site}}` | 16px icon when available, otherwise website name |
-| `{{display}}` | Icon or website name, followed by the page title |
+| `{{site}}` | Empty by default; when automatic icons are enabled, a 16px icon or website name |
+| `{{display}}` | Page title by default; when automatic icons are enabled, icon or website name followed by the title |
 
 Examples:
 
