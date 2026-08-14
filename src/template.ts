@@ -11,6 +11,9 @@ export function renderTemplate(template: string, metadata: LinkMetadata, showIco
     ? `<img class="link-title-plus-icon" src="${metadata.icon}" alt="" width="16" height="16">`
     : escapeMarkdownText(metadata.siteName);
   const title = escapeMarkdownText(metadata.title);
+  const display = !showIcon
+    ? title === metadata.siteName ? title : `${title} ${escapeMarkdownText(metadata.siteName)}`
+    : title === metadata.siteName ? site : `${site} ${title}`;
   const values: Record<string, string> = {
     title,
     url: metadata.url,
@@ -19,7 +22,7 @@ export function renderTemplate(template: string, metadata: LinkMetadata, showIco
     icon: metadata.icon ?? "",
     description: escapeMarkdownText(metadata.description),
     site,
-    display: site ? (title === metadata.siteName ? site : `${site} ${title}`) : title
+    display
   };
 
   return template.replace(PLACEHOLDER, (_, key: string) => values[key]);

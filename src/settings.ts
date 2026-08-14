@@ -18,7 +18,7 @@ export class LinkTitlePlusSettingTab extends PluginSettingTab {
       },
       {
         name: "自动展示网站图标",
-        desc: "默认开启；关闭后显示网站名称和网页标题。图标获取失败时也会显示网站名称。",
+        desc: "默认开启；关闭后显示网页标题和网站名称。图标获取失败时也会显示网站名称。",
         control: { type: "toggle", key: "showIcon", defaultValue: DEFAULT_SETTINGS.showIcon }
       },
       {
@@ -70,7 +70,7 @@ export class LinkTitlePlusSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("自动展示网站图标")
-      .setDesc("默认开启；关闭后显示网站名称和网页标题。图标获取失败时也会显示网站名称。")
+      .setDesc("默认开启；关闭后显示网页标题和网站名称。图标获取失败时也会显示网站名称。")
       .addToggle((toggle) => toggle
         .setValue(this.plugin.settings.showIcon)
         .onChange(async (value) => {

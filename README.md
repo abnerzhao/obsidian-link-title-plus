@@ -38,7 +38,7 @@ The default template is:
 [{{display}}]({{url}})
 ```
 
-`{{display}}` renders a 16px icon and title when a favicon is available, or a website name and title when it is not. When **Show website icons automatically** is disabled, it renders the website name and title.
+`{{display}}` renders a 16px icon and title when a favicon is available, or a website name and title when it is not. When **Show website icons automatically** is disabled, it renders the page title followed by the website name.
 
 Available placeholders:
 
@@ -51,7 +51,7 @@ Available placeholders:
 | `{{icon}}` | Inlined favicon data URL |
 | `{{description}}` | Page description |
 | `{{site}}` | A 16px icon when available; otherwise the website name. Disabling automatic icons always uses the website name. |
-| `{{display}}` | Icon or website name, followed by the page title |
+| `{{display}}` | Icon or website name followed by the page title; when automatic icons are disabled, page title followed by website name |
 
 Examples:
 
