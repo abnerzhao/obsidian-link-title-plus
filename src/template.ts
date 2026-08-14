@@ -7,11 +7,9 @@ function escapeMarkdownText(value: string): string {
 }
 
 export function renderTemplate(template: string, metadata: LinkMetadata, showIcon: boolean): string {
-  const site = showIcon
-    ? metadata.icon
-      ? `<img class="link-title-plus-icon" src="${metadata.icon}" alt="" width="16" height="16">`
-      : escapeMarkdownText(metadata.siteName)
-    : "";
+  const site = showIcon && metadata.icon
+    ? `<img class="link-title-plus-icon" src="${metadata.icon}" alt="" width="16" height="16">`
+    : escapeMarkdownText(metadata.siteName);
   const title = escapeMarkdownText(metadata.title);
   const values: Record<string, string> = {
     title,

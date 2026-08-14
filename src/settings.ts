@@ -2,7 +2,7 @@ import { App, PluginSettingTab, Setting, type SettingDefinitionItem } from "obsi
 import type LinkTitlePlusPlugin from "./main";
 import { DEFAULT_SETTINGS, type LinkTitlePlusSettings } from "./types";
 
-const TEMPLATE_DESCRIPTION = "默认模板通常只需保留即可。\n默认：[{{display}}]({{url}})\n仅标题：[{{title}}]({{url}})\n网站名 + 标题：[{{siteName}} · {{title}}]({{url}})\n高级占位符：{{site}}、{{hostname}}、{{icon}}、{{description}}。{{display}} = 标题；开启图标后，为图标或网站名称 + 标题。";
+const TEMPLATE_DESCRIPTION = "默认模板通常只需保留即可。\n默认：[{{display}}]({{url}})\n仅标题：[{{title}}]({{url}})\n网站名 + 标题：[{{siteName}} · {{title}}]({{url}})\n高级占位符：{{site}}、{{hostname}}、{{icon}}、{{description}}。{{display}} = 图标或网站名称 + 标题。";
 
 export class LinkTitlePlusSettingTab extends PluginSettingTab {
   constructor(app: App, private plugin: LinkTitlePlusPlugin) {
@@ -18,7 +18,7 @@ export class LinkTitlePlusSettingTab extends PluginSettingTab {
       },
       {
         name: "自动展示网站图标",
-        desc: "关闭时默认只显示网页标题；开启后优先显示 16px 网站图标，获取失败时显示网站名称。",
+        desc: "默认开启；关闭后显示网站名称和网页标题。图标获取失败时也会显示网站名称。",
         control: { type: "toggle", key: "showIcon", defaultValue: DEFAULT_SETTINGS.showIcon }
       },
       {
@@ -70,7 +70,7 @@ export class LinkTitlePlusSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("自动展示网站图标")
-      .setDesc("关闭时默认只显示网页标题；开启后优先显示 16px 网站图标，获取失败时显示网站名称。")
+      .setDesc("默认开启；关闭后显示网站名称和网页标题。图标获取失败时也会显示网站名称。")
       .addToggle((toggle) => toggle
         .setValue(this.plugin.settings.showIcon)
         .onChange(async (value) => {

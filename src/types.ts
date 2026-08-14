@@ -16,7 +16,7 @@ export interface LinkTitlePlusSettings {
 
 export const DEFAULT_SETTINGS: LinkTitlePlusSettings = {
   enabled: true,
-  showIcon: false,
+  showIcon: true,
   displayTemplate: "[{{display}}]({{url}})",
   proxyUrl: ""
 };
