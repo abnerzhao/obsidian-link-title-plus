@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.4 - 2026-08-14
+
+- Add an option to show website icons automatically, disabled by default.
+- Use a stable GitHub favicon and align rendered icons with link text.
+
 ## 0.1.3 - 2026-07-30
 
 - Update the README with English installation and usage instructions.
