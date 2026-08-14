@@ -2,6 +2,11 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.5 - 2026-08-14
+
+- Show website icons by default, with an option to display the page title and website name instead.
+- Avoid repeating a website name that is already present in the page title.
+
 ## 0.1.4 - 2026-08-14
 
 - Add an option to show website icons automatically, disabled by default.
