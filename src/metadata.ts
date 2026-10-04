@@ -188,7 +188,8 @@ async function fetchYoutubeMetadata(pageUrl: URL, proxyUrl: string): Promise<Lin
     const endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(pageUrl.href)}&format=json`;
     const data = JSON.parse(await fetchHtml(endpoint, proxyUrl)) as { title?: string };
     const title = typeof data.title === "string" && data.title.trim() ? data.title.trim() : "YouTube";
-    const icon = await fetchIconDataUrl("https://www.youtube.com/favicon.ico", pageUrl.href, proxyUrl);
+    const iconUrl = pageUrl.hostname === "youtu.be" ? "https://youtu.be/favicon.ico" : "https://www.youtube.com/favicon.ico";
+    const icon = await fetchIconDataUrl(iconUrl, pageUrl.href, proxyUrl);
     return { title, description: "", hostname: pageUrl.hostname, siteName: "YouTube", icon, url: pageUrl.href };
   } catch {
     return fallbackMetadata(pageUrl, proxyUrl);
